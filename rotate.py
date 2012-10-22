@@ -11,7 +11,9 @@
 # Usage: Run this script on a scheduled basis (via cron) and then add the
 #   following to the startup script:"eval $(cat ~/.fehbg)"
 # 
-# Depends: feh `apt-get -q -y install feh`
+# Depends:
+#   feh `apt-get -q -y install feh`
+#   correct mount point settings in /etc/fstab to allow user mounts (-o users)
 #
 #########
 import argparse
@@ -20,6 +22,7 @@ import logging
 import os
 import errno
 import shutil
+import subprocess
 
 def image_index(img_key):
     return {
@@ -58,8 +61,11 @@ def create_local_dir(dir):
             raise
 
 def ensure_mount_point_exists(mountpoint):
+    mount_args = ["mount", mountpoint]
     try:
         os.mkdir(mountpoint)
+        if subprocess.call(mount_args) != 0:
+            logging.debug("unable to ensure mounted filesystem: %s" % mountpoint)
     except OSError as err:
         if err.errno == errno.EEXIST:
             pass
@@ -71,7 +77,6 @@ def ensure_mount_point_exists(mountpoint):
 def copy_images_from_share(src, dst):
     # refresh all images from image share (delete and recopy)
     try:
-        ensure_mount_point_exists(src)
         shutil.rmtree(dst, ignore_errors=True)
         shutil.copytree(src, dst)
     except OSError as err:
@@ -110,8 +115,10 @@ def main():
                     # link_file() or create_dot_fehbg_file()
                     logging.debug("image file name: %s" % image_index(config[1]))
                     create_local_dir('imagefiles')
-                    # move_images_from_share()
                     create_fehbg_file(image_index(config[1]))
+                    ensure_mount_point_exists("/mnt/wahdocs")
+                    copy_images_from_share("/mnt/wahdocs/where", # FIX
+                                           os.path.expanduser("~/imagefiles"))
     except IOError as e:
         logging.CRITICAL("ERROR: schedule file not found: %s, %s" % args.filename, e)
 
