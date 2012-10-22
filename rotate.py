@@ -104,7 +104,8 @@ def main():
     logging.debug("All args: %s" % args)
     # process
     try:
-        with open(args.filename, 'r') as f:
+        process_dir = os.path.expanduser('~/imagefiles/')
+        with open(os.path.join(process_dir, args.filename), 'r') as f:
             for line in f:
                 config = line.rstrip().split('=')
                 if config[0] == get_current_week():
