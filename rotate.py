@@ -36,7 +36,7 @@ def get_current_week():
     return "week" + str(datetime.date.isocalendar(datetime.date.today())[1])
 
 def get_user_image_path(img):
-    return os.path.join(os.environ['HOME'], 'slides', img + '.png')
+    return os.path.join(os.environ['HOME'], 'slides', img + '.jpg')
 
 def create_fehbg_file(img_path):
     # create the ~/.fehbg file for the user this script is run as
