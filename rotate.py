@@ -36,7 +36,7 @@ def get_current_week():
     return "week" + str(datetime.date.isocalendar(datetime.date.today())[1])
 
 def get_user_image_path(img):
-    return os.path.join(os.environ['HOME'], 'imagefiles', img + '.png')
+    return os.path.join(os.environ['HOME'], 'slides', img + '.png')
 
 def create_fehbg_file(img_path):
     # create the ~/.fehbg file for the user this script is run as
@@ -104,7 +104,7 @@ def main():
     logging.debug("All args: %s" % args)
     # process
     try:
-        process_dir = os.path.expanduser('~/imagefiles/')
+        process_dir = os.path.expanduser('~/slides/')
         with open(os.path.join(process_dir, args.filename), 'r') as f:
             for line in f:
                 config = line.rstrip().split('=')
@@ -115,11 +115,11 @@ def main():
                     # and set file accordingly
                     # link_file() or create_dot_fehbg_file()
                     logging.debug("image file name: %s" % image_index(config[1]))
-                    create_local_dir('imagefiles')
+                    create_local_dir('slides')
                     create_fehbg_file(image_index(config[1]))
                     ensure_mount_point_exists("/mnt/wahdocs")
-                    copy_images_from_share("/mnt/wahdocs/where", # FIX
-                                           os.path.expanduser("~/imagefiles"))
+                    copy_images_from_share("/mnt/wahdocs/slides", # FIX
+                                           os.path.expanduser("~/slides"))
     except IOError as e:
         logging.CRITICAL("ERROR: schedule file not found: %s, %s" % args.filename, e)
 
