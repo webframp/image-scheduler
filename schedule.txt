@@ -1,0 +1,5 @@
+week1=englishCA
+week2=englishSA
+week4=spanishCA
+week5=spanishSA
+week42=englishSA
