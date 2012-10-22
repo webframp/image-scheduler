@@ -85,9 +85,9 @@ def copy_images_from_share(src, dst):
 def main():
     # arguments are fun!
     parser = argparse.ArgumentParser(description='Utility script to parse SAD/CA schedule file and update theme images')
-    parser.add_argument('--debug', dest='verbose', action='store_const', const=1, help='Enable debug logging')
-    parser.add_argument('--filename', dest='filename', action='store', default='schedule.txt', help='Filename of schedule file')
-    parser.add_argument('--logfile', dest='logfile', default=False, help='Log to a file instead of stdout')
+    parser.add_argument('--debug', dest='verbose', action='store_const', const=1, help='Enable debug logging (default: off)')
+    parser.add_argument('--filename', dest='filename', action='store', default='schedule.txt', help='Filename of schedule file (default: schedule.txt)')
+    parser.add_argument('--logfile', dest='logfile', default=False, help='Log to a file instead of stdout (default: None)')
     args = parser.parse_args()
 
     # handle some args
