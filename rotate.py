@@ -29,7 +29,7 @@ image_index = {
     'englishSA': 'enSAimg',
     'spanishCA': 'esCAimg',
     'spanishSA': 'esSAimg',
-}
+    }
 
 
 def get_current_week():
@@ -66,7 +66,7 @@ def create_local_dir(dir):
 def ensure_mount_point_exists(mountpoint):
     mount_args = ["mount", mountpoint]
     if os.path.exists(mountpoint):
-        logging.warning("Mount point already exists: %s Doing nothing",
+        logging.debug("Mount point already exists: %s Doing nothing",
                         mountpoint)
         return
     else:
@@ -96,7 +96,7 @@ def main():
     if args.logfile and args.verbose:
         logging.basicConfig(filename=args.logfile, level=logging.DEBUG)
     elif args.logfile:
-        logging.basicConfig(filename=args.logfile, level=logging.INFO)
+        logging.basicConfig(filename=args.logfile, level=logging.CRITICAL)
     elif args.verbose:
         logging.basicConfig(level=logging.DEBUG)
     else:
@@ -104,19 +104,25 @@ def main():
 
     logging.debug("All args: %s", args)
     # process
+    process_dir = os.path.expanduser('~/slides/')
+    if os.path.exists(process_dir):
+        logging.debug("Directory already exists")
+    else:
+        os.makedirs(process_dir)
+        logging.debug("Directory created: %s", process_dir)
+
+    ensure_mount_point_exists("/mnt/wahdocs")
+    copy_images_from_share("/mnt/wahdocs/slides", process_dir)
+
     try:
-        process_dir = os.path.expanduser('~/slides/')
         with open(os.path.join(process_dir, args.filename), 'r') as f:
             for line in f:
                 config = line.rstrip().split('=')
+                logging.debug("week found in file as:  %s", config[0])
+                logging.debug("image key name: %s", config[1])
+                logging.debug("image file name: %s", image_index[config[1]])
+                logging.debug("Current week is: %s", get_current_week())
                 if config[0] == get_current_week():
-                    logging.debug("current week found in file as:  %s", config[0])
-                    logging.debug("image key name: %s", config[1])
-                    logging.debug("image file name: %s", image_index[config[1]])
-                    create_local_dir('slides')
-                    # ensure_mount_point_exists("/mnt/wahdocs")
-                    # copy_images_from_share("/mnt/wahdocs/slides", # FIX
-                    #                        os.path.expanduser("~/slides"))
                     create_fehbg_file(image_index[config[1]])
     except IOError as e:
         logging.exception("ERROR: schedule file not found: %s, %s", args.filename, e)
