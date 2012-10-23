@@ -24,25 +24,23 @@ import os
 import shutil
 import subprocess
 
-image_index = {
-    'englishCA': 'enCAimg',
-    'englishSA': 'enSAimg',
-    'spanishCA': 'esCAimg',
-    'spanishSA': 'esSAimg',
-    }
-
 
 def get_current_week():
     return "week" + str(datetime.date.isocalendar(datetime.date.today())[1])
+
+
+def get_todays_date():
+    # return date as 8 digit, yr first: 20121023
+    return str(datetime.date.isoformat(datetime.date.today())).replace('-','')
 
 
 def get_user_image_path(img):
     return os.path.join(os.environ['HOME'], 'slides', img + '.jpg')
 
 
-def create_fehbg_file(img_path):
+def create_fehbg_file(img):
     # create the ~/.fehbg file for the user this script is run as
-    feh_cmd = 'feh --bg-fill' + ' "' + get_user_image_path(img_path) + '"\n'
+    feh_cmd = 'feh --bg-fill' + ' "' + get_user_image_path(img) + '"\n'
     try:
         with open(os.path.expanduser('~/.fehbg'), 'w') as f:
             f.write(feh_cmd)
@@ -74,7 +72,7 @@ def ensure_mount_point_exists(mountpoint):
         subprocess.call(mount_args) != 0
 
 
-def copy_images_from_share(src, dst):
+def refresh_images_from_share(src, dst):
     # refresh all images from image share (delete and recopy)
     try:
         shutil.rmtree(dst, ignore_errors=True)
@@ -112,18 +110,17 @@ def main():
         logging.debug("Directory created: %s", process_dir)
 
     ensure_mount_point_exists("/mnt/wahdocs")
-    copy_images_from_share("/mnt/wahdocs/slides", process_dir)
+    refresh_images_from_share("/mnt/wahdocs/slides", process_dir)
 
     try:
         with open(os.path.join(process_dir, args.filename), 'r') as f:
             for line in f:
                 config = line.rstrip().split('=')
-                logging.debug("week found in file as:  %s", config[0])
-                logging.debug("image key name: %s", config[1])
-                logging.debug("image file name: %s", image_index[config[1]])
-                logging.debug("Current week is: %s", get_current_week())
-                if config[0] == get_current_week():
-                    create_fehbg_file(image_index[config[1]])
+                logging.debug("date found in file as:  %s", config[0])
+                logging.debug("image file name: %s", config[1])
+                logging.debug("Current date is: %s", get_todays_date())
+                if config[0] == get_todays_date():
+                    create_fehbg_file(config[1])
     except IOError as e:
         logging.exception("ERROR: schedule file not found: %s, %s", args.filename, e)
 
